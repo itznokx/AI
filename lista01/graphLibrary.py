@@ -1,4 +1,5 @@
 import heapq as hp
+import math
 class Graph:
     def __init__(self,graph: dict={}) -> None:
         self.graph = graph;
@@ -13,7 +14,7 @@ class Graph:
             self.graph[node] = {};
     def shortest_distances(self, source_node:str):
         distance = {}
-        distances = {node: float(-1.0) for node in self.graph}
+        distances = {node: (math.inf) for node in self.graph}
         distances[source_node] = 0.0;
         #visited nodes set for performance (check if a node is in set)
         visited_nodes = set()
@@ -31,7 +32,7 @@ class Graph:
                     hp.heappush(priority_queue,(neighbor,aux_dist))
         return distances;
     def return_predecessors(self,distances: dict):
-        pred = {node: "" for node in self.graph}
+        pred = {node: None for node in self.graph}
         for node,distance in distances.items():
             for neighbor,cost in self.graph[node].items():
                 if distances[neighbor] == distance+cost:
@@ -61,4 +62,13 @@ class Graph:
             path.append(current_node)
             current_node = predecessors[current_node]
         path.reverse()
-        return path;
+        for x in path:
+            print(x)
+    def print_graph(self):
+        for node,neighbor in self.graph.items():
+            print ("{} : {}".format(node,neighbor))
+    def print_distances(self,source:str):
+        print("Shortest distances from node {}".format(source))
+        ds = self.shortest_distances(source)
+        for node,distance in ds.items():
+            print ("{} : {}".format(node,distance))
