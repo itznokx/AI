@@ -1,5 +1,6 @@
 import heapq as hp
 import math
+from tkinter.constants import CURRENT
 class Graph:
     def __init__(self,graph: dict={}) -> None:
         self.graph = graph;
@@ -72,3 +73,11 @@ class Graph:
         ds = self.shortest_distances(source)
         for node,distance in ds.items():
             print ("{} : {}".format(node,distance))
+    def returnChange(self,change,currency):
+        toGiveBack = [0] * len(currency)
+        for pos,money in enumerate(reversed(currency)):
+            while money <= change:
+                change = change - money
+                toGiveBack[len(currency)-pos-1] += 1
+        print(toGiveBack)
+        return(toGiveBack)
