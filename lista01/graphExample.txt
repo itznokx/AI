@@ -1,0 +1,4 @@
+Node1 Node2 Cost
+A B 99.8
+B E 7.0
+A C 8.0

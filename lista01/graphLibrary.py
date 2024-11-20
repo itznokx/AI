@@ -1,7 +1,7 @@
 import heapq as hp
 class Graph:
-    def __init__(self,_graph: dict={}):
-        self.graph = _graph;
+    def __init__(self,graph: dict={}) -> None:
+        self.graph = graph;
     def add_edge(self,node1,node2,cost):
         if node1 not in self.graph:
             self.graph[node1] = {}
@@ -12,6 +12,7 @@ class Graph:
         else:
             self.graph[node] = {};
     def shortest_distances(self, source_node:str):
+        distance = {}
         distances = {node: float(-1.0) for node in self.graph}
         distances[source_node] = 0.0;
         #visited nodes set for performance (check if a node is in set)
@@ -41,8 +42,17 @@ class Graph:
     def get_file_graph(self,file_path: str):
         #follow the graphExample.txt pattern :)
         #TODO
-        pass
-    def uniform_cost_search(self,source:str,target: str):
+        file = open(file_path)
+        count = 0;
+        for line in file:
+            if (line == ""):
+                continue
+            aux=line.split(" ")
+            #print("Node {} to Node {} with cost {}".format(aux[0],aux[1],aux[2]))
+            self.add_edge(aux[0],aux[1],float(aux[2]))
+            self.add_edge(aux[1],aux[0],float(aux[2]))
+        file.close()
+    def short_path(self,source:str,target: str):
         #Path list
         path = []
         predecessors = self.return_predecessors(self.shortest_distances(source))
