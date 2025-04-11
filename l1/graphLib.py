@@ -73,3 +73,5 @@ class Graph:
 					actualnb.remove(node)
 					actualnb = concatenate_lists_nr(actualnb,self.return_neighbourhood(node))
 
+	def dfs(self,initialNode,finalNode) -> None:
+		return
