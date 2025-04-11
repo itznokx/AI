@@ -1,3 +1,4 @@
 import graphLib as gl
 
-gl.file_to_graph("test2.txt","directional")
+graph1 = gl.Graph(gl.file_to_graph("test.txt","directional"))
+graph1.bfs("6","1")

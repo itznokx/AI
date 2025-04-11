@@ -15,10 +15,16 @@ def file_to_graph (filename:str,type:str) -> dict:
 	file.close()
 	print(graph_final)
 	return graph_final
-def concatenate_lists (list1:list,list2:list):
+# no duplicates concatenation
+def concatenate_lists_nr (list1:list,list2:list):
 	for item in list2:
-		list1.append(item)
+		if item not in list1:
+			list1.append(item)
 	return list1
+def is_empty (list:list):
+	if not list:
+		return True
+	return False
 class Graph:
 	def __init__ (self,graph: dict={}) -> None:
 		self.graph = graph
@@ -35,20 +41,35 @@ class Graph:
 	def return_nodes(self,nodes) -> list:
 		return self.graph.keys()
 	def return_neighbourhood (self,node) -> list:
-		return self.graph[node].keys()
+		list1 = []
+		try:
+			for item in self.graph[node].keys():
+				list1.append(item)
+		except:
+			return []
+		return list1
 	def return_neighbourhood_w_costs (self,node) -> dict:
 		return self.graph[node]
-	def bfs (self,initialNode,finalNode) -> list:
-		isvisited = {}
+	def bfs (self,initialNode,finalNode) -> None:
+		if initialNode not in self.graph.keys():
+			print (initialNode+" is a invalid inital node")
+			return None
+		isvisited = {initialNode}
+		print("Visited node: "+initialNode)
 		done = False
-		actualnb = return_neighbourhood(initialNode)
+		actualnb = self.return_neighbourhood(initialNode)
 		while (done==False):
 			for node in actualnb:
-				if (node == finalNode):
-					done = true
-				elif node not in isvisited:
+				if (is_empty(actualnb)):
+					done = True
+					break
+				elif (node == finalNode):
+					print("Visited desired node: "+node)
+					done = True
+					break
+				elif node not in isvisited: 
 					isvisited.add(node)
 					print("Visited node: "+node)
 					actualnb.remove(node)
-					actualnb = concatenate_lists(actualnb,return_neighbourhood(node))
+					actualnb = concatenate_lists_nr(actualnb,self.return_neighbourhood(node))
 
