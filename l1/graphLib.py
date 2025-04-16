@@ -72,6 +72,16 @@ class Graph:
 					print("Visited node: "+node)
 					actualnb.remove(node)
 					actualnb = concatenate_lists_nr(actualnb,self.return_neighbourhood(node))
+	def do_dfs(self,isvisited:set,nodeI,finalNode):
+		if (nodeI==finalNode):
+			return
+		if node not in isvisited:
+			print("Visited: "+node)
+			isvisited.add(node)
+			for neighbour in self.return_neighbourhood(nodeI):
+				do_dfs(isvisited,neighbour,finalNode)
 
-	def dfs(self,initialNode,finalNode) -> None:
+	def dfs(self,initialNode) -> None:
+		isvisited = set()
+
 		return
