@@ -81,7 +81,16 @@ class Graph:
 			for neighbour in self.return_neighbourhood(nodeI):
 				do_dfs(isvisited,neighbour,finalNode)
 
-	def dfs(self,initialNode,finalNode) -> None:
+	def dfs(self,initialNode:str,finalNode:str) -> None:
 		isvisited = set()
 		do_dfs(isvisited,initialNode,finalNode)
 		return
+	def return_predecessors(self,distances:dict):
+        pred = {node: None for node in self.graph}
+        for node,distance in distances.items():
+            for neighbor,cost in self.graph[node].items():
+                if distances[neighbor] == distance+cost:
+                    pred[neighbor] = node
+        return pred
+	def shortest_path(self,initialNode:str,finalNode:str):
+		
