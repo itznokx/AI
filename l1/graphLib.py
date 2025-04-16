@@ -81,7 +81,7 @@ class Graph:
 			for neighbour in self.return_neighbourhood(nodeI):
 				do_dfs(isvisited,neighbour,finalNode)
 
-	def dfs(self,initialNode) -> None:
+	def dfs(self,initialNode,finalNode) -> None:
 		isvisited = set()
-
+		do_dfs(isvisited,initialNode,finalNode)
 		return
