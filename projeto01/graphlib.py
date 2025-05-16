@@ -51,7 +51,7 @@ class Graph:
 		return list1
 	def return_neighborhood_w_costs (self,node) -> dict:
 		return self.graph[node]
-	def bfs (self,initialNode,finalNode,silent = False) -> None:
+	def bfs (self,initialNode,finalNode,silent = False):
 		visited = set()
 		queue = deque([initialNode])
 		aux_path = {start:None}
