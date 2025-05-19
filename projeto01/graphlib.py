@@ -1,5 +1,6 @@
 import math
 import heapq
+import time
 from collections import deque
 
 def file_to_graph (filename:str,type:str) -> dict:
@@ -13,6 +14,12 @@ def file_to_graph (filename:str,type:str) -> dict:
 			graph_final[aux[0]][aux[1]] = aux[2]
 		else:
 			graph_final[aux[0]][aux[1]] = aux[2]
+		if type=="undirectional":
+			if aux[1] not in graph_final:
+				graph_final[aux[1]] = {}
+				graph_final[aux[1]][aux[0]] = aux[2]
+			else:
+				graph_final[aux[1]][aux[0]] = aux[2]
 	file.close()
 	print(graph_final)
 	return graph_final
@@ -51,33 +58,18 @@ class Graph:
 		return list1
 	def return_neighborhood_w_costs (self,node) -> dict:
 		return self.graph[node]
-	def bfs (self,initialNode,finalNode,silent = False):
-		visited = set()
-		queue = deque([initialNode])
-		aux_path = {start:None}
-		while queue:
-			current = queue.popleft()
-			if (current==goal):
-				if (!silent):
-					print("Visited node: "+current)
-				break
-			visited.add(current)
-			for neighbor in return_neighborhood(current):
-				if (neighbor not in visited and neighbor not in queue):
-					aux_path[neighbor] = current
-					queue.append(neighbor)
-			path = []
-			if goal not in aux_path:
-				if (!silent):
-					print("Nenhum caminho ate "+finalNode)
-				break
-			else:
-				while goal is not None:
-            		path.append(goal)
-            		goal = parent[goal]
-        			path.reverse()
-    	return path
-
+	def reconstruct_path(self,came_from, node):
+	    path = []
+	    while node:
+	        path.append(node)
+	        node = came_from.get(node)
+	    return path[::-1]
+	def bfs(start, goal):
+	    queue = deque([start,None])
+	    reverse_path = {}
+	    visited = set()
+	    exp_nodes = 0
+	    start_time = time.time()
 	def do_dfs(self,isvisited:set,nodeI,finalNode):
 		if (nodeI==finalNode):
 			return
@@ -91,4 +83,3 @@ class Graph:
 		isvisited = set()
 		self.do_dfs(isvisited,initialNode,finalNode)
 		return
-		
