@@ -78,6 +78,20 @@ class MissaoAerea(ProblemInterface):
             return 1/custo_total
         else:
             return float(inf)
+    def fill_offspring(offspring_target_middle, parent_source_middle, mapping_dict_source_to_target):
+        copied_segment_values = set(offspring_target_middle[cut1:cut2])
+        for i in range(size):
+            if i < cut1 or i >= cut2:
+                gene_padrao = parent_source_middle[i]
+
+                geracao_atual = gene_padrao
+                while geracao_atual in copied_segment_values:
+                    if geracao_atual in mapping_dict_source_to_target:
+                        geracao_atual = mapping_dict_source_to_target[geracao_atual]
+                    else:
+                        break
+                offspring_target_middle[i] = geracao_atual
+        return offspring_target_middle
     def crossover(self, parent1, parent2):
         size = len(parent1) - 2 # Exclui a base do início e do fim
         p1_meio = parent1[1:-1]
@@ -94,50 +108,11 @@ class MissaoAerea(ProblemInterface):
         map_p1_to_p2 = {p1_meio[i]: p2_meio[i] for i in range(cut1, cut2)}
         map_p2_to_p1 = {p2_meio[i]: p1_meio[i] for i in range(cut1, cut2)}
 
-        def fill_offspring(offspring_target_middle, parent_source_middle, mapping_dict_source_to_target):
-            # Create a set of elements already copied into the offspring's segment for quick lookup
-            # This segment is fixed from the parent whose segment was copied
-            copied_segment_values = set(offspring_target_middle[cut1:cut2])
-
-            for i in range(size):
-                if i < cut1 or i >= cut2: # Only fill positions outside the cut segment
-                    gene_from_source = parent_source_middle[i] # Take gene from the other parent
-
-                    # Resolve conflicts: if gene_from_source is already in offspring's copied segment
-                    # then we need to map it.
-                    current_gene = gene_from_source
-                    
-                    # Loop until current_gene is not in the copied segment
-                    # Or if it's not in the map (meaning it wasn't part of the swapped section of source parent)
-                    while current_gene in copied_segment_values:
-                        if current_gene in mapping_dict_source_to_target:
-                            current_gene = mapping_dict_source_to_target[current_gene]
-                        else:
-                            # This case should ideally not be reached if the parents are perfect permutations
-                            # and current_gene is truly a duplicate requiring mapping.
-                            # It means current_gene is a duplicate in the target's copied segment,
-                            # but current_gene itself was not part of the source parent's segment that was mapped.
-                            break # Break if no further mapping is found (should not happen in true PMX)
-                    offspring_target_middle[i] = current_gene
-            return offspring_target_middle
-
-        # Preenche os genes restantes para offspring1
-        # offspring1_meio is filled with p1_meio[cut1:cut2]
-        # We fill remaining positions with values from p2_meio.
-        # If p2_meio[i] (outside segment) conflicts with p1_meio[cut1:cut2] (copied segment),
-        # we use map_p2_to_p1 (since the value in p1_meio[cut1:cut2] corresponds to map_p2_to_p1[value in p2_meio[cut1:cut2]])
+    
         offspring1_meio = fill_offspring(offspring1_meio, p2_meio, map_p2_to_p1)
-
-        # Preenche os genes restantes para offspring2
-        # offspring2_meio is filled with p2_meio[cut1:cut2]
-        # We fill remaining positions with values from p1_meio.
-        # If p1_meio[i] (outside segment) conflicts with p2_meio[cut1:cut2] (copied segment),
-        # we use map_p1_to_p2
         offspring2_meio = fill_offspring(offspring2_meio, p1_meio, map_p1_to_p2)
-        
+    
         return [0] + offspring1_meio + [0], [0] + offspring2_meio + [0]
-
-
     def mutacao(self, individuo, taxa_mutacao):
         if random.random() < taxa_mutacao:
             # Não mutar a base (índice 0 e último)
