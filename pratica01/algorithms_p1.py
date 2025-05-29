@@ -51,7 +51,7 @@ class ProblemInterface(ABC):
         pass
 
 class MissaoAerea(ProblemInterface):
-   def __init__ (self,consume,tank_capacity,index,distances,risks):
+    def __init__ (self,consume,tank_capacity,index,distances,risks):
         self.consumo_por_km = consume
         self.capacidade_tanque = tank_capacity
         self.indices = index
@@ -60,10 +60,11 @@ class MissaoAerea(ProblemInterface):
         self.chaves = list(index.keys())
 
     def gerar_individuo(self):
-        caminho = list(range(1, self.chaves))  # Alvos (exceto a base)
+        caminho = list(range(1, len(self.chaves)))  # Alvos (exceto a base)
         rng.shuffle(caminho)
         return [0] + caminho + [0]
-    def custo_total(self, individuo) -> float: #Calcula custo total (distancia_total + 5x risco_total) e a distancia
+   
+    def calcular_custo(self, individuo) -> float: #Calcula custo total (distancia_total + 5x risco_total) e a distancia
         distancia_total = 0;
         riscos_soma = 0;
         old = 0;
@@ -71,13 +72,14 @@ class MissaoAerea(ProblemInterface):
             distancia_total += self.distancias[old][x]
             riscos_soma += self.riscos[x]
             old = x
-        return (custo_total+(riscos_soma*5)),distancia_total
+        return (distancia_total+(riscos_soma*5)),distancia_total
     def calcular_fitness(self, individuo):
         custo_total, _ = self.calcular_custo(individuo)
         if (custo_total > 0):
             return 1/custo_total
         else:
             return float(inf)
+    
     def fill_offspring(offspring_target_middle, parent_source_middle, mapping_dict_source_to_target):
         copied_segment_values = set(offspring_target_middle[cut1:cut2])
         for i in range(size):
@@ -109,8 +111,8 @@ class MissaoAerea(ProblemInterface):
         map_p2_to_p1 = {p2_meio[i]: p1_meio[i] for i in range(cut1, cut2)}
 
     
-        offspring1_meio = fill_offspring(offspring1_meio, p2_meio, map_p2_to_p1)
-        offspring2_meio = fill_offspring(offspring2_meio, p1_meio, map_p1_to_p2)
+        offspring1_meio = self.fill_offspring(offspring1_meio, p2_meio, map_p2_to_p1)
+        offspring2_meio = self.fill_offspring(offspring2_meio, p1_meio, map_p1_to_p2)
     
         return [0] + offspring1_meio + [0], [0] + offspring2_meio + [0]
     def mutacao(self, individuo, taxa_mutacao):
