@@ -87,76 +87,69 @@ class MissaoAerea(ProblemInterface):
         # Fitness = 1 / Custo Total. Para evitar divisão por zero, caso o custo seja 0.
         return 1 / custo_total if custo_total > 0 else float('inf')
 
+    class MissaoAerea(ProblemInterface):
+   def __init__ (self,consume,tank_capacity,index,distances,risks):
+        self.consumo_por_km = consume
+        self.capacidade_tanque = tank_capacity
+        self.indices = index
+        self.distancias = distances
+        self.riscos = risks
+        self.chaves = list(index.keys())
+
+    def gerar_individuo(self):
+        caminho = list(range(1, self.chaves))  # Alvos (exceto a base)
+        random.shuffle(caminho)
+        return [0] + caminho + [0]
+    def custo_total(self, individuo) -> float: #Calcula custo total (distancia_total + 5x risco_total) e a distancia
+        distancia_total = 0;
+        riscos_soma = 0;
+        old = 0;
+        for x in individuo:
+            distancia_total += self.distancias[old][x]
+            riscos_soma += self.riscos[x]
+            old = x
+        return (custo_total+(riscos_soma*5)),distancia_total
+    def calcular_fitness(self, individuo):
+        custo_total, _ = self.calcular_custo(individuo)
+        if (custo_total > 0):
+            return 1/custo_total
+        else:
+            return float(inf)
+    def fill_offspring(offspring_target_middle, parent_source_middle, mapping_dict_source_to_target):
+        copied_segment_values = set(offspring_target_middle[cut1:cut2])
+        for i in range(size):
+            if i < cut1 or i >= cut2:
+                gene_padrao = parent_source_middle[i]
+
+                geracao_atual = gene_padrao
+                while geracao_atual in copied_segment_values:
+                    if geracao_atual in mapping_dict_source_to_target:
+                        geracao_atual = mapping_dict_source_to_target[geracao_atual]
+                    else:
+                        break
+                offspring_target_middle[i] = geracao_atual
+        return offspring_target_middle
     def crossover(self, parent1, parent2):
-        """
-        Realiza crossover preservando a base no início e fim.
-        Utiliza o Partially Matched Crossover (PMX).
-        """
         size = len(parent1) - 2 # Exclui a base do início e do fim
-        p1_middle = parent1[1:-1]
-        p2_middle = parent2[1:-1]
+        p1_meio = parent1[1:-1]
+        p2_meio = parent2[1:-1]
 
-        offspring1_middle = [None] * size
-        offspring2_middle = [None] * size
+        offspring1_meio = [None] * size
+        offspring2_meio = [None] * size
 
-        # Seleciona dois pontos de corte aleatórios
         cut1, cut2 = sorted(random.sample(range(size), 2))
 
-        # Copia a seção do meio de p1 para offspring1 e de p2 para offspring2
-        offspring1_middle[cut1:cut2] = p1_middle[cut1:cut2]
-        offspring2_middle[cut1:cut2] = p2_middle[cut1:cut2]
+        offspring1_meio[cut1:cut2] = p1_meio[cut1:cut2]
+        offspring2_meio[cut1:cut2] = p2_meio[cut1:cut2]
 
-        # Crie os mapeamentos para a seção copiada
-        # map_p1_to_p2: gene from p1_middle[i] (in segment) -> gene from p2_middle[i] (in segment)
-        # map_p2_to_p1: gene from p2_middle[i] (in segment) -> gene from p1_middle[i] (in segment)
-        map_p1_to_p2 = {p1_middle[i]: p2_middle[i] for i in range(cut1, cut2)}
-        map_p2_to_p1 = {p2_middle[i]: p1_middle[i] for i in range(cut1, cut2)}
+        map_p1_to_p2 = {p1_meio[i]: p2_meio[i] for i in range(cut1, cut2)}
+        map_p2_to_p1 = {p2_meio[i]: p1_meio[i] for i in range(cut1, cut2)}
 
-        # Função auxiliar para preencher as partes restantes de um offspring
-        def fill_offspring(offspring_target_middle, parent_source_middle, mapping_dict_source_to_target):
-            # Create a set of elements already copied into the offspring's segment for quick lookup
-            # This segment is fixed from the parent whose segment was copied
-            copied_segment_values = set(offspring_target_middle[cut1:cut2])
-
-            for i in range(size):
-                if i < cut1 or i >= cut2: # Only fill positions outside the cut segment
-                    gene_from_source = parent_source_middle[i] # Take gene from the other parent
-
-                    # Resolve conflicts: if gene_from_source is already in offspring's copied segment
-                    # then we need to map it.
-                    current_gene = gene_from_source
-                    
-                    # Loop until current_gene is not in the copied segment
-                    # Or if it's not in the map (meaning it wasn't part of the swapped section of source parent)
-                    while current_gene in copied_segment_values:
-                        if current_gene in mapping_dict_source_to_target:
-                            current_gene = mapping_dict_source_to_target[current_gene]
-                        else:
-                            # This case should ideally not be reached if the parents are perfect permutations
-                            # and current_gene is truly a duplicate requiring mapping.
-                            # It means current_gene is a duplicate in the target's copied segment,
-                            # but current_gene itself was not part of the source parent's segment that was mapped.
-                            break # Break if no further mapping is found (should not happen in true PMX)
-                    offspring_target_middle[i] = current_gene
-            return offspring_target_middle
-
-        # Preenche os genes restantes para offspring1
-        # offspring1_middle is filled with p1_middle[cut1:cut2]
-        # We fill remaining positions with values from p2_middle.
-        # If p2_middle[i] (outside segment) conflicts with p1_middle[cut1:cut2] (copied segment),
-        # we use map_p2_to_p1 (since the value in p1_middle[cut1:cut2] corresponds to map_p2_to_p1[value in p2_middle[cut1:cut2]])
-        offspring1_middle = fill_offspring(offspring1_middle, p2_middle, map_p2_to_p1)
-
-        # Preenche os genes restantes para offspring2
-        # offspring2_middle is filled with p2_middle[cut1:cut2]
-        # We fill remaining positions with values from p1_middle.
-        # If p1_middle[i] (outside segment) conflicts with p2_middle[cut1:cut2] (copied segment),
-        # we use map_p1_to_p2
-        offspring2_middle = fill_offspring(offspring2_middle, p1_middle, map_p1_to_p2)
-        
-        return [0] + offspring1_middle + [0], [0] + offspring2_middle + [0]
-
-
+    
+        offspring1_meio = fill_offspring(offspring1_meio, p2_meio, map_p2_to_p1)
+        offspring2_meio = fill_offspring(offspring2_meio, p1_meio, map_p1_to_p2)
+    
+        return [0] + offspring1_meio + [0], [0] + offspring2_meio + [0]
     def mutacao(self, individuo, taxa_mutacao):
         """
         Aplica mutação em um indivíduo sem mover a base.
