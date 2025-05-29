@@ -74,29 +74,31 @@ class MissaoAerea(ProblemInterface):
         return (custo_total+(riscos_soma*5)),distancia_total
     def calcular_fitness(self, individuo):
         custo_total, _ = self.calcular_custo(individuo)
-        # Fitness = 1 / Custo Total. Para evitar divisão por zero, caso o custo seja 0.
-        return 1 / custo_total if custo_total > 0 else float('inf')
+        if (custo_total > 0):
+            return 1/custo_total
+        else:
+            return float(inf)
 
     def crossover(self, parent1, parent2):
         size = len(parent1) - 2 # Exclui a base do início e do fim
-        p1_middle = parent1[1:-1]
-        p2_middle = parent2[1:-1]
+        p1_meio = parent1[1:-1]
+        p2_meio = parent2[1:-1]
 
-        offspring1_middle = [None] * size
-        offspring2_middle = [None] * size
+        offspring1_meio = [None] * size
+        offspring2_meio = [None] * size
 
         # Seleciona dois pontos de corte aleatórios
         cut1, cut2 = sorted(random.sample(range(size), 2))
 
         # Copia a seção do meio de p1 para offspring1 e de p2 para offspring2
-        offspring1_middle[cut1:cut2] = p1_middle[cut1:cut2]
-        offspring2_middle[cut1:cut2] = p2_middle[cut1:cut2]
+        offspring1_meio[cut1:cut2] = p1_meio[cut1:cut2]
+        offspring2_meio[cut1:cut2] = p2_meio[cut1:cut2]
 
         # Crie os mapeamentos para a seção copiada
-        # map_p1_to_p2: gene from p1_middle[i] (in segment) -> gene from p2_middle[i] (in segment)
-        # map_p2_to_p1: gene from p2_middle[i] (in segment) -> gene from p1_middle[i] (in segment)
-        map_p1_to_p2 = {p1_middle[i]: p2_middle[i] for i in range(cut1, cut2)}
-        map_p2_to_p1 = {p2_middle[i]: p1_middle[i] for i in range(cut1, cut2)}
+        # map_p1_to_p2: gene from p1_meio[i] (in segment) -> gene from p2_meio[i] (in segment)
+        # map_p2_to_p1: gene from p2_meio[i] (in segment) -> gene from p1_meio[i] (in segment)
+        map_p1_to_p2 = {p1_meio[i]: p2_meio[i] for i in range(cut1, cut2)}
+        map_p2_to_p1 = {p2_meio[i]: p1_meio[i] for i in range(cut1, cut2)}
 
         # Função auxiliar para preencher as partes restantes de um offspring
         def fill_offspring(offspring_target_middle, parent_source_middle, mapping_dict_source_to_target):
@@ -127,20 +129,20 @@ class MissaoAerea(ProblemInterface):
             return offspring_target_middle
 
         # Preenche os genes restantes para offspring1
-        # offspring1_middle is filled with p1_middle[cut1:cut2]
-        # We fill remaining positions with values from p2_middle.
-        # If p2_middle[i] (outside segment) conflicts with p1_middle[cut1:cut2] (copied segment),
-        # we use map_p2_to_p1 (since the value in p1_middle[cut1:cut2] corresponds to map_p2_to_p1[value in p2_middle[cut1:cut2]])
-        offspring1_middle = fill_offspring(offspring1_middle, p2_middle, map_p2_to_p1)
+        # offspring1_meio is filled with p1_meio[cut1:cut2]
+        # We fill remaining positions with values from p2_meio.
+        # If p2_meio[i] (outside segment) conflicts with p1_meio[cut1:cut2] (copied segment),
+        # we use map_p2_to_p1 (since the value in p1_meio[cut1:cut2] corresponds to map_p2_to_p1[value in p2_meio[cut1:cut2]])
+        offspring1_meio = fill_offspring(offspring1_meio, p2_meio, map_p2_to_p1)
 
         # Preenche os genes restantes para offspring2
-        # offspring2_middle is filled with p2_middle[cut1:cut2]
-        # We fill remaining positions with values from p1_middle.
-        # If p1_middle[i] (outside segment) conflicts with p2_middle[cut1:cut2] (copied segment),
+        # offspring2_meio is filled with p2_meio[cut1:cut2]
+        # We fill remaining positions with values from p1_meio.
+        # If p1_meio[i] (outside segment) conflicts with p2_meio[cut1:cut2] (copied segment),
         # we use map_p1_to_p2
-        offspring2_middle = fill_offspring(offspring2_middle, p1_middle, map_p1_to_p2)
+        offspring2_meio = fill_offspring(offspring2_meio, p1_meio, map_p1_to_p2)
         
-        return [0] + offspring1_middle + [0], [0] + offspring2_middle + [0]
+        return [0] + offspring1_meio + [0], [0] + offspring2_meio + [0]
 
 
     def mutacao(self, individuo, taxa_mutacao):
@@ -180,7 +182,6 @@ class AlgoritmoGenetico:
         populacao = [self.problema.gerar_individuo() for _ in range(self.tamanho_populacao)]
         melhor_individuo = None
         melhor_custo = float('inf')
-
         for geracao in range(self.geracoes):
             fitnesses = [self.problema.calcular_fitness(ind) for ind in populacao]
             
