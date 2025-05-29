@@ -1,4 +1,4 @@
-import random
+import random as rng
 import matplotlib.pyplot as plt
 from abc import ABC, abstractmethod
 
@@ -61,7 +61,7 @@ class MissaoAerea(ProblemInterface):
 
     def gerar_individuo(self):
         caminho = list(range(1, self.chaves))  # Alvos (exceto a base)
-        random.shuffle(caminho)
+        rng.shuffle(caminho)
         return [0] + caminho + [0]
     def custo_total(self, individuo) -> float: #Calcula custo total (distancia_total + 5x risco_total) e a distancia
         distancia_total = 0;
@@ -100,7 +100,7 @@ class MissaoAerea(ProblemInterface):
         offspring1_meio = [None] * size
         offspring2_meio = [None] * size
 
-        cut1, cut2 = sorted(random.sample(range(size), 2))
+        cut1, cut2 = sorted(rng.sample(range(size), 2))
 
         offspring1_meio[cut1:cut2] = p1_meio[cut1:cut2]
         offspring2_meio[cut1:cut2] = p2_meio[cut1:cut2]
@@ -114,14 +114,13 @@ class MissaoAerea(ProblemInterface):
     
         return [0] + offspring1_meio + [0], [0] + offspring2_meio + [0]
     def mutacao(self, individuo, taxa_mutacao):
-        if random.random() < taxa_mutacao:
+        if rng.rng() < taxa_mutacao:
             # Não mutar a base (índice 0 e último)
             indices_mutaveis = list(range(1, len(individuo) - 1))
             if len(indices_mutaveis) >= 2:
-                idx1, idx2 = random.sample(indices_mutaveis, 2)
+                idx1, idx2 = rng.sample(indices_mutaveis, 2)
                 individuo[idx1], individuo[idx2] = individuo[idx2], individuo[idx1]
         return individuo
-
 # Algoritmo Genético
 class AlgoritmoGenetico:
     def __init__(self, problema, tamanho_populacao, geracoes, taxa_crossover, taxa_mutacao):
@@ -135,16 +134,15 @@ class AlgoritmoGenetico:
     def _selecionar(self, populacao, fitnesses):
         total_fitness = sum(fitnesses)
         if total_fitness == 0:
-            # If all fitness are zero (e.g., very high costs), select randomly
-            return random.choice(populacao)
+            return rng.choice(populacao)
         
-        pick = random.uniform(0, total_fitness)
+        pick = rng.uniform(0, total_fitness)
         current = 0
         for individuo, fitness in zip(populacao, fitnesses):
             current += fitness
             if current > pick:
                 return individuo
-        return random.choice(populacao) # Fallback
+        return rng.choice(populacao) # Fallback
 
     def executar(self):
         populacao = [self.problema.gerar_individuo() for _ in range(self.tamanho_populacao)]
@@ -173,7 +171,7 @@ class AlgoritmoGenetico:
                 pai1 = self._selecionar(populacao, fitnesses)
                 pai2 = self._selecionar(populacao, fitnesses)
 
-                if random.random() < self.taxa_crossover:
+                if rng.rng() < self.taxa_crossover:
                     filho1, filho2 = self.problema.crossover(pai1, pai2)
                 else:
                     filho1, filho2 = pai1, pai2
