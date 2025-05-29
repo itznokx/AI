@@ -187,36 +187,29 @@ class AlgoritmoGenetico:
 
         return melhor_individuo, melhor_custo
 
-# Execução
-problema = MissaoAerea()
-ag = AlgoritmoGenetico(
-    problema=problema,
-    tamanho_populacao=100,
-    geracoes=500,
-    taxa_crossover=0.8,
-    taxa_mutacao=0.1
-)
+TAMANHO_POPULACAO=100
+GERACOES=500
+TAXA_CROSSOVER=0.8
+TAXA_MUTACAO=0.1
 
-melhor_rota_indices, custo_total_rota = ag.executar()
+def main():
+    m1 = MissaoAerea(CONSUMO_POR_KM,CAPACIDADE_TANQUE,INDICES,DISTANCIAS,RISCOS)
+    ag = AlgoritmoGenetico(m1,TAMANHO_POPULACAO,GERACOES,TAXA_CROSSOVER,TAXA_MUTACAO)
+    print("Resultados da Missao Aerea:")
+    melhor_rota_indices, custo_total_rota = ag.executar()
+    melhor_rota_nomes = [INDICES[i] for i in melhor_rota_indices]
+    _, distancia_total_rota = m1.calcular_custo(melhor_rota_indices)
+    consumo_rota = distancia_total_rota * CONSUMO_POR_KM
+    missao_viavel = consumo_rota <= CAPACIDADE_TANQUE
+    print(f"Melhor rota encontrada (índices): {melhor_rota_indices}")
+    print(f"Melhor rota encontrada (nomes): {melhor_rota_nomes}")
+    print(f"Custo total dessa rota: {custo_total_rota:.2f}")
+    print(f"Distância total percorrida: {distancia_total_rota:.2f} km")
+    print(f"Consumo de combustível da rota: {consumo_rota:.2f} litros")
+    print(f"Capacidade do tanque: {CAPACIDADE_TANQUE} litros")
+    print(f"A missão é viável com o combustível disponível? {'Sim' if missao_viavel else 'Não'}")
+main()
 
-# Obter a rota em nomes
-melhor_rota_nomes = [INDICES[i] for i in melhor_rota_indices]
-
-# Calcular distância total para a melhor rota
-_, distancia_total_rota = problema.calcular_custo(melhor_rota_indices)
-
-# Verificar viabilidade
-consumo_rota = distancia_total_rota * CONSUMO_POR_KM
-missao_viavel = consumo_rota <= CAPACIDADE_TANQUE
-
-print("Resultados do Algoritmo Genético:")
-print(f"Melhor rota encontrada (índices): {melhor_rota_indices}")
-print(f"Melhor rota encontrada (nomes): {melhor_rota_nomes}")
-print(f"Custo total dessa rota: {custo_total_rota:.2f}")
-print(f"Distância total percorrida: {distancia_total_rota:.2f} km")
-print(f"Consumo de combustível da rota: {consumo_rota:.2f} litros")
-print(f"Capacidade do tanque: {CAPACIDADE_TANQUE} litros")
-print(f"A missão é viável com o combustível disponível? {'Sim' if missao_viavel else 'Não'}")
 
 # Plotar gráfico de custo
 plt.figure(figsize=(10, 6))
