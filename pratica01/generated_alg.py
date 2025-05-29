@@ -25,9 +25,8 @@ DISTANCIAS = [
 # Níveis de risco
 RISCOS = [0, 8, 3, 5, 6, 4]
 
-# Especificações da Aeronave
-CONSUMO_POR_KM = 2  # litros/km
-CAPACIDADE_TANQUE = 500  # litros
+CONSUMO_POR_KM = 2
+CAPACIDADE_TANQUE = 500
 
 class ProblemInterface(ABC):
     """Interface que define as operações específicas do problema"""
@@ -49,49 +48,36 @@ class ProblemInterface(ABC):
 
     @abstractmethod
     def mutacao(self, individuo, taxa_mutacao):
-        """Aplica mutação em um indivíduo"""
         pass
 
 class MissaoAerea(ProblemInterface):
-    def __init__(self):
-        self.num_locais = len(INDICES)
+   def __init__ (self,consume,tank_capacity,index,distances,risks):
+        self.consumo_por_km = consume
+        self.capacidade_tanque = tank_capacity
+        self.indices = index
+        self.distancias = distances
+        self.riscos = risks
+        self.chaves = list(index.keys())
 
     def gerar_individuo(self):
-        """Gera uma rota aleatória começando na base (índice 0) e retornando a ela."""
-        locais_intermediarios = list(range(1, self.num_locais))  # Alvos (exceto a base)
-        random.shuffle(locais_intermediarios)
-        # A rota começa na base, visita os alvos intermediários, e retorna à base.
-        # [Base, Alvo1, Alvo2, ..., AlvoN, Base]
-        return [0] + locais_intermediarios + [0]
-
-    def calcular_custo(self, individuo):
-        """Calcula o custo total de uma rota."""
-        distancia_total = 0
-        soma_riscos = 0
-
-        # Calcular distância total e soma dos riscos
-        for i in range(len(individuo) - 1):
-            origem = individuo[i]
-            destino = individuo[i+1]
-            distancia_total += DISTANCIAS[origem][destino]
-            if destino != 0: # Não considerar o risco da base na soma, mas sim o risco dos alvos
-                soma_riscos += RISCOS[destino]
-
-        # Custo Total = Distância Total + (Soma dos Riscos × 5)
-        custo_total = distancia_total + (soma_riscos * 5)
-        return custo_total, distancia_total
-
+        caminho = list(range(1, self.chaves))  # Alvos (exceto a base)
+        random.shuffle(caminho)
+        return [0] + caminho + [0]
+    def custo_total(self, individuo) -> float: #Calcula custo total (distancia_total + 5x risco_total) e a distancia
+        distancia_total = 0;
+        riscos_soma = 0;
+        old = 0;
+        for x in individuo:
+            distancia_total += self.distancias[old][x]
+            riscos_soma += self.riscos[x]
+            old = x
+        return (custo_total+(riscos_soma*5)),distancia_total
     def calcular_fitness(self, individuo):
-        """Calcula o fitness de um indivíduo."""
         custo_total, _ = self.calcular_custo(individuo)
         # Fitness = 1 / Custo Total. Para evitar divisão por zero, caso o custo seja 0.
         return 1 / custo_total if custo_total > 0 else float('inf')
 
     def crossover(self, parent1, parent2):
-        """
-        Realiza crossover preservando a base no início e fim.
-        Utiliza o Partially Matched Crossover (PMX).
-        """
         size = len(parent1) - 2 # Exclui a base do início e do fim
         p1_middle = parent1[1:-1]
         p2_middle = parent2[1:-1]
@@ -158,10 +144,6 @@ class MissaoAerea(ProblemInterface):
 
 
     def mutacao(self, individuo, taxa_mutacao):
-        """
-        Aplica mutação em um indivíduo sem mover a base.
-        Troca aleatoriamente dois alvos intermediários.
-        """
         if random.random() < taxa_mutacao:
             # Não mutar a base (índice 0 e último)
             indices_mutaveis = list(range(1, len(individuo) - 1))
@@ -181,7 +163,6 @@ class AlgoritmoGenetico:
         self.melhores_custos_por_geracao = []
 
     def _selecionar(self, populacao, fitnesses):
-        """Seleção por roleta."""
         total_fitness = sum(fitnesses)
         if total_fitness == 0:
             # If all fitness are zero (e.g., very high costs), select randomly
