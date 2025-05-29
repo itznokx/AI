@@ -199,23 +199,23 @@ def main():
     melhor_rota_indices, custo_total_rota = ag.executar()
     melhor_rota_nomes = [INDICES[i] for i in melhor_rota_indices]
     _, distancia_total_rota = m1.calcular_custo(melhor_rota_indices)
-    consumo_rota = distancia_total_rota * CONSUMO_POR_KM
-    missao_viavel = consumo_rota <= CAPACIDADE_TANQUE
+    consumo_rota = distancia_total_rota * m1.consumo_por_km
     print(f"Melhor rota encontrada (índices): {melhor_rota_indices}")
     print(f"Melhor rota encontrada (nomes): {melhor_rota_nomes}")
     print(f"Custo total dessa rota: {custo_total_rota:.2f}")
     print(f"Distância total percorrida: {distancia_total_rota:.2f} km")
     print(f"Consumo de combustível da rota: {consumo_rota:.2f} litros")
-    print(f"Capacidade do tanque: {CAPACIDADE_TANQUE} litros")
-    print(f"A missão é viável com o combustível disponível? {'Sim' if missao_viavel else 'Não'}")
+    print(f"Capacidade do tanque: {m1.capacidade_tanque} litros")
+    print(f"A missão é viável com o combustível disponível? {'Sim' if (consumo_rota <= m1.capacidade_tanque) else 'Não'}")
+    # Plotar gráfico de custo
+    plt.figure(figsize=(10, 6))
+    plt.plot(ag.melhores_custos_por_geracao)
+    plt.title('Melhor Custo por Geração')
+    plt.xlabel('Geração')
+    plt.ylabel('Custo Total')
+    plt.grid(True)
+    plt.show()
 main()
 
 
-# Plotar gráfico de custo
-plt.figure(figsize=(10, 6))
-plt.plot(ag.melhores_custos_por_geracao)
-plt.title('Melhor Custo por Geração')
-plt.xlabel('Geração')
-plt.ylabel('Custo Total')
-plt.grid(True)
-plt.show()
+
