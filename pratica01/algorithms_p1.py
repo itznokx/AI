@@ -78,7 +78,6 @@ class MissaoAerea(ProblemInterface):
             return 1/custo_total
         else:
             return float(inf)
-
     def crossover(self, parent1, parent2):
         size = len(parent1) - 2 # Exclui a base do início e do fim
         p1_meio = parent1[1:-1]
@@ -87,20 +86,14 @@ class MissaoAerea(ProblemInterface):
         offspring1_meio = [None] * size
         offspring2_meio = [None] * size
 
-        # Seleciona dois pontos de corte aleatórios
         cut1, cut2 = sorted(random.sample(range(size), 2))
 
-        # Copia a seção do meio de p1 para offspring1 e de p2 para offspring2
         offspring1_meio[cut1:cut2] = p1_meio[cut1:cut2]
         offspring2_meio[cut1:cut2] = p2_meio[cut1:cut2]
 
-        # Crie os mapeamentos para a seção copiada
-        # map_p1_to_p2: gene from p1_meio[i] (in segment) -> gene from p2_meio[i] (in segment)
-        # map_p2_to_p1: gene from p2_meio[i] (in segment) -> gene from p1_meio[i] (in segment)
         map_p1_to_p2 = {p1_meio[i]: p2_meio[i] for i in range(cut1, cut2)}
         map_p2_to_p1 = {p2_meio[i]: p1_meio[i] for i in range(cut1, cut2)}
 
-        # Função auxiliar para preencher as partes restantes de um offspring
         def fill_offspring(offspring_target_middle, parent_source_middle, mapping_dict_source_to_target):
             # Create a set of elements already copied into the offspring's segment for quick lookup
             # This segment is fixed from the parent whose segment was copied
