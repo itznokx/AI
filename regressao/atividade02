@@ -1,0 +1,99 @@
+{
+  "metadata": {
+    "kernelspec": {
+      "name": "xpython",
+      "display_name": "Python 3.13 (XPython)",
+      "language": "python"
+    },
+    "language_info": {
+      "file_extension": ".py",
+      "mimetype": "text/x-python",
+      "name": "python",
+      "version": "3.13.1"
+    }
+  },
+  "nbformat_minor": 5,
+  "nbformat": 4,
+  "cells": [
+    {
+      "id": "3aafd1e8-f0ef-4b26-96e5-86cf3e722b53",
+      "cell_type": "markdown",
+      "source": "# 1 – Regressão Linear Univariada com GD e Mínimos Quadrados Considere os dados da Tabela 1, que relacionam o número de horas estudadas com a nota final (0 a 100) de alunos em uma disciplina: Horas Estudadas (x) Nota (y)\n| Horas Estudadas (x) | Nota (y) |\n| ----- | ----- |\n| 1.0  | 52 |\n| 2.0  | 57 |\n| 3.0  | 59 |\n| 4.0  | 63 |\n| 5.0  | 67 |\n| 6.0  | 70 |\n| 7.0  | 74 |\n| 8.0  | 76 |\n| 9.0  | 79 |\n| 10.0 | 83 |\n| 11.0 | 85 |\n| 12.0 | 87 |\n| 13.0 | 90 |\n| 14.0 | 92 |\n| 15.0 | 95 |\n### (a) Utilize o m´etodo dos m´ınimos quadrados para estimar os coeficientes da reta de regressão.\n### (b) Implemente o algoritmo de gradiente descendente com taxa de aprendizado α = 0,01 por 1000 iterações. Plote a função de custo J(θ).\n### (c) Compare os resultados graficamente e discuta a convergˆencia visual.",
+      "metadata": {}
+    },
+    {
+      "id": "34d1c81f-10c3-44c3-901c-32b2689c242d",
+      "cell_type": "code",
+      "source": "import numpy as np\nimport matplotlib.pyplot as plt",
+      "metadata": {
+        "trusted": true
+      },
+      "outputs": [
+        {
+          "name": "stderr",
+          "output_type": "stream",
+          "text": "Matplotlib is building the font cache; this may take a moment.\n"
+        }
+      ],
+      "execution_count": 1
+    },
+    {
+      "id": "fcefa459-17c4-4cfa-ac68-6259e6b19829",
+      "cell_type": "code",
+      "source": "def minimos_quadrados(x, y):\n    n = len(x)\n    x_min, y_min = np.mean(x), np.mean(y)\n    numerador = np.sum((x - x_min) * (y - y_min))\n    denominador = np.sum((x - x_min)**2)\n    \n    theta1 = numerador / denominador\n    theta0 = y_mean - theta1 * x_mean\n    \n    return theta0, theta1\ndef gradiente_descendente(x, y, alpha, max_iter):\n    m = len(x)  \n    theta0 = 0.0\n    theta1 = 0.0 \n    custo_historico = []\n\n    for i in range(max_iter):\n        y_pred = theta0 + theta1 * x\n        erro = y_pred - y\n        custo = np.sum(erro**2) / (2 * m)\n        custo_historico.append(custo)\n        \n        gradiente_theta0 = (1 / m) * np.sum(erro)\n        gradiente_theta1 = (1 / m) * np.sum(erro * x)\n        \n        theta0 = theta0 - alpha * gradiente_theta0\n        theta1 = theta1 - alpha * gradiente_theta1\n        \n    return theta0, theta1, custo_historico\n",
+      "metadata": {
+        "trusted": true
+      },
+      "outputs": [],
+      "execution_count": 2
+    },
+    {
+      "id": "4ca59958-45d4-4b7c-a2cc-f0ac79cd9a59",
+      "cell_type": "code",
+      "source": "def questao1 ():\n    x1 = np.array([1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0, 11.0, 12.0, 13.0, 14.0, 15.0])\n    y1 = np.array([52, 57, 59, 63, 67, 70, 74, 76, 79, 83, 85, 87, 90, 92, 95])\n    taxa1 = 0.01\n    iter1 = 1000\n    \n    # Executa o algoritmo\n    theta0_mq, theta1_mq = minimos_quadrados(x1, y1)\n    theta0_gd, theta1_gd, custo_historico = gradiente_descendente(x1, y1, taxa1, iter1)\n    print(\"---- Resultados dos Coeficientes ----\")\n    print(f\"Mínimos Quadrados:  theta0 = {theta0_mq:.4f}, theta1 = {theta1_mq:.4f}\") # 4 de precisão\n    print(f\"Gradiente Descendente: theta0 = {theta0_gd:.4f}, theta1 = {theta1_gd:.4f}\\n\") # 4 de precisão\n    plt.figure(figsize=(10, 6))\n    plt.plot(range(iter1), custo_historico)\n    plt.title('Função de Custo (J) vs. Iterações', fontsize=16)\n    plt.xlabel('Número de Iterações', fontsize=12)\n    plt.ylabel('Custo J(θ)', fontsize=12)\n    plt.grid(True)\n    plt.show()\n    \n    \n    # --- Gráfico de Comparação das Retas de Regressão ---\n    plt.figure(figsize=(10, 6))\n    \n    # Plota os dados originais\n    plt.scatter(x1, y1, color='blue', label='Dados Originais', s=50)\n    \n    # Gera pontos para as retas\n    x_reta = np.linspace(0, 16, 100)\n    \n    # Calcula os valores de y para cada reta\n    y_reta_mq = theta0_mq + theta1_mq * x_reta\n    y_reta_gd = theta0_gd + theta1_gd * x_reta\n    \n    # Plota as retas\n    plt.plot(x_reta, y_reta_mq, color='red', label=f'Mínimos Quadrados (y = {theta0_mq:.2f} + {theta1_mq:.2f}x)')\n    plt.plot(x_reta, y_reta_gd, color='green', linestyle='--', label=f'Gradiente Descendente (y = {theta0_gd:.2f} + {theta1_gd:.2f}x)')\n    \n    # Configurações do gráfico\n    plt.title('Comparação das Retas de Regressão', fontsize=16)\n    plt.xlabel('Horas Estudadas (x)', fontsize=12)\n    plt.ylabel('Nota (y)', fontsize=12)\n    plt.legend()\n    plt.grid(True)\n    plt.xlim(0, 16)\n    plt.ylim(50, 100)\n    plt.show()",
+      "metadata": {
+        "trusted": true
+      },
+      "outputs": [],
+      "execution_count": 3
+    },
+    {
+      "id": "b160128c-b28f-405a-a46e-f204257f7387",
+      "cell_type": "code",
+      "source": "questao1()",
+      "metadata": {
+        "trusted": true
+      },
+      "outputs": [
+        {
+          "name": "stdout",
+          "output_type": "stream",
+          "text": "---- Resultados dos Coeficientes ----\n"
+        },
+        {
+          "ename": "<class 'NameError'>",
+          "evalue": "name 'theta0_mq' is not defined",
+          "traceback": [
+            "\u001b[31m---------------------------------------------------------------------------\u001b[39m",
+            "\u001b[31mNameError\u001b[39m                                 Traceback (most recent call last)",
+            "\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[4]\u001b[39m\u001b[32m, line 1\u001b[39m\n\u001b[32m----> \u001b[39m\u001b[32m1\u001b[39m \u001b[43mquestao1\u001b[49m\u001b[43m(\u001b[49m\u001b[43m)\u001b[49m\n",
+            "\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[3]\u001b[39m\u001b[32m, line 12\u001b[39m, in \u001b[36mquestao1\u001b[39m\u001b[34m()\u001b[39m\n\u001b[32m      8\u001b[39m theta0_gd, theta1_gd, custo_historico = gradiente_descendente(\n\u001b[32m      9\u001b[39m     x1, y1, taxa1, iter1\n\u001b[32m     10\u001b[39m )\n\u001b[32m     11\u001b[39m \u001b[38;5;28mprint\u001b[39m(\u001b[33m\"\u001b[39m\u001b[33m---- Resultados dos Coeficientes ----\u001b[39m\u001b[33m\"\u001b[39m)\n\u001b[32m---> \u001b[39m\u001b[32m12\u001b[39m \u001b[38;5;28mprint\u001b[39m(\u001b[33mf\u001b[39m\u001b[33m\"\u001b[39m\u001b[33mMínimos Quadrados:  theta0 = \u001b[39m\u001b[38;5;132;01m{\u001b[39;00m\u001b[43mtheta0_mq\u001b[49m\u001b[38;5;132;01m:\u001b[39;00m\u001b[33m.4f\u001b[39m\u001b[38;5;132;01m}\u001b[39;00m\u001b[33m, theta1 = \u001b[39m\u001b[38;5;132;01m{\u001b[39;00mtheta1_mq\u001b[38;5;132;01m:\u001b[39;00m\u001b[33m.4f\u001b[39m\u001b[38;5;132;01m}\u001b[39;00m\u001b[33m\"\u001b[39m) \u001b[38;5;66;03m# 4 de precisão\u001b[39;00m\n\u001b[32m     13\u001b[39m \u001b[38;5;28mprint\u001b[39m(\u001b[33mf\u001b[39m\u001b[33m\"\u001b[39m\u001b[33mGradiente Descendente: theta0 = \u001b[39m\u001b[38;5;132;01m{\u001b[39;00mtheta0_gd\u001b[38;5;132;01m:\u001b[39;00m\u001b[33m.4f\u001b[39m\u001b[38;5;132;01m}\u001b[39;00m\u001b[33m, theta1 = \u001b[39m\u001b[38;5;132;01m{\u001b[39;00mtheta1_gd\u001b[38;5;132;01m:\u001b[39;00m\u001b[33m.4f\u001b[39m\u001b[38;5;132;01m}\u001b[39;00m\u001b[38;5;130;01m\\n\u001b[39;00m\u001b[33m\"\u001b[39m) \u001b[38;5;66;03m# 4 de precisão\u001b[39;00m\n\u001b[32m     14\u001b[39m plt.figure(figsize=(\u001b[32m10\u001b[39m, \u001b[32m6\u001b[39m))\n",
+            "\u001b[31mNameError\u001b[39m: name 'theta0_mq' is not defined"
+          ],
+          "output_type": "error"
+        }
+      ],
+      "execution_count": 4
+    },
+    {
+      "id": "68fe8643-3eff-47e8-92e2-9f5036654d5f",
+      "cell_type": "code",
+      "source": "",
+      "metadata": {
+        "trusted": true
+      },
+      "outputs": [],
+      "execution_count": null
+    }
+  ]
+}
